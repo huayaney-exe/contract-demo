@@ -20,6 +20,12 @@ export interface CompanyData {
   email: string;
   businessActivity: string;
   
+  // Contact person fields
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail1?: string;
+  contactEmail2?: string;
+  
   // Service fields
   serviceType?: string;
   isRemuneraciones?: boolean;
