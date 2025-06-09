@@ -37,58 +37,70 @@ const Index = () => {
   const progress = currentStep === 'form' ? 50 : 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-interbank-light to-white">
+      <div className="container-custom section">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-primary mb-4">
+          <div className="text-center mb-12">
+            <h1 className="gradient-text mb-6 animate-slide-in">
               Anexo Pagos Masivos
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Complete la información para generar su anexo de servicios bancarios
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto animate-slide-in">
+              Si desea afiliarse a los servicios de Pago de Remuneraciones y CTS, Pago a Proveedores y/o Pagos Varios, por favor complete este anexo.
             </p>
           </div>
 
           {/* Progress Indicator */}
-          <Card className="p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  currentStep === 'form' ? 'bg-primary text-primary-foreground' : 'bg-green-500 text-white'
+          <Card className="p-8 mb-10 card-hover bg-white/80 backdrop-blur-sm border-interbank-primary/10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
+                  currentStep === 'form' 
+                    ? 'bg-interbank-primary text-white shadow-lg' 
+                    : 'bg-interbank-button-green text-white shadow-lg'
                 }`}>
-                  {currentStep === 'contract' ? <CheckCircle className="w-5 h-5" /> : '1'}
+                  {currentStep === 'contract' ? <CheckCircle className="w-6 h-6" /> : '1'}
                 </div>
-                <span className="font-medium">Información del Cliente</span>
+                <div>
+                  <span className="font-semibold text-lg">Información del Cliente</span>
+                  <p className="text-sm text-muted-foreground">Complete los datos de su empresa</p>
+                </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  currentStep === 'contract' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              <div className="flex items-center space-x-4">
+                <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
+                  currentStep === 'contract' 
+                    ? 'bg-interbank-primary text-white shadow-lg' 
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   2
                 </div>
-                <span className={`font-medium ${
-                  currentStep === 'contract' ? 'text-primary' : 'text-muted-foreground'
-                }`}>
-                  Vista Previa del Anexo
-                </span>
+                <div>
+                  <span className={`font-semibold text-lg transition-colors duration-300 ${
+                    currentStep === 'contract' ? 'text-interbank-primary' : 'text-muted-foreground'
+                  }`}>
+                    Vista Previa del Anexo
+                  </span>
+                  <p className="text-sm text-muted-foreground">Revise y confirme la información</p>
+                </div>
               </div>
             </div>
-            <Progress value={progress} className="w-full" />
+            <Progress value={progress} className="w-full h-3 bg-interbank-light" />
           </Card>
 
           {/* Content */}
-          {currentStep === 'form' && (
-            <CompanyForm onSubmit={handleFormSubmit} />
-          )}
+          <div className="animate-slide-in">
+            {currentStep === 'form' && (
+              <CompanyForm onSubmit={handleFormSubmit} />
+            )}
 
-          {currentStep === 'contract' && companyData && (
-            <ContractPreview 
-              companyData={companyData} 
-              onBack={handleBackToForm}
-            />
-          )}
+            {currentStep === 'contract' && companyData && (
+              <ContractPreview 
+                companyData={companyData} 
+                onBack={handleBackToForm}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

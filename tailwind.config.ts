@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Colores específicos de Interbank
+				'interbank-primary': 'hsl(var(--interbank-primary))',
+				'interbank-secondary': 'hsl(var(--interbank-secondary))',
+				'interbank-accent': 'hsl(var(--interbank-accent))',
+				'interbank-light': 'hsl(var(--interbank-light))',
+				'interbank-dark': 'hsl(var(--interbank-dark))',
+				'interbank-topnav': 'hsl(var(--interbank-topnav))',
+				'interbank-button-green': 'hsl(var(--interbank-button-green))',
+				'interbank-button-blue': 'hsl(var(--interbank-button-blue))',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +94,40 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				// Animaciones personalizadas de Interbank
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'pulse-light': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
+				},
+				'slide-in': {
+					'0%': {
+						transform: 'translateY(20px)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'translateY(0)',
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'pulse-light': 'pulse-light 3s ease-in-out infinite',
+				'slide-in': 'slide-in 0.8s ease-out'
+			},
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+			},
+			boxShadow: {
+				'card-hover': '0 4px 16px rgba(0,0,0,0.1)',
+				'card-hover-active': '0 8px 32px rgba(0,0,0,0.15)',
 			}
 		}
 	},
