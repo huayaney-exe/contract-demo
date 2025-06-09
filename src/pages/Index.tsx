@@ -39,11 +39,23 @@ export interface CompanyData {
   currency?: string;
   accountNumber?: string;
   
-  // Optional controls
+  // Remuneraciones controls
   maxAmountPerBatchSoles?: string;
   maxAmountPerBatchDollars?: string;
   maxAmountPerPaymentSoles?: string;
   maxAmountPerPaymentDollars?: string;
+  
+  // Proveedores controls
+  maxAmountPerBatchProveedoresSoles?: string;
+  maxAmountPerBatchProveedoresDollars?: string;
+  maxAmountPerPaymentProveedoresSoles?: string;
+  maxAmountPerPaymentProveedoresDollars?: string;
+  
+  // Pagos Varios controls
+  maxAmountPerBatchVariosSoles?: string;
+  maxAmountPerBatchVariosDollars?: string;
+  maxAmountPerPaymentVariosSoles?: string;
+  maxAmountPerPaymentVariosDollars?: string;
   
   // Additional information
   maxDaysProviders?: string;

@@ -154,11 +154,23 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
         currency,
         accountNumber,
         
-        // Optional controls - map from controlsData to the interface fields
+        // Remuneraciones controls
         maxAmountPerBatchSoles: controlsData.remuneracionesLoteSoles,
         maxAmountPerBatchDollars: controlsData.remuneracionesLoteUsd,
         maxAmountPerPaymentSoles: controlsData.remuneracionesPagoSoles,
         maxAmountPerPaymentDollars: controlsData.remuneracionesPagoUsd,
+        
+        // Proveedores controls
+        maxAmountPerBatchProveedoresSoles: controlsData.proveedoresLoteSoles,
+        maxAmountPerBatchProveedoresDollars: controlsData.proveedoresLoteUsd,
+        maxAmountPerPaymentProveedoresSoles: controlsData.proveedoresPagoSoles,
+        maxAmountPerPaymentProveedoresDollars: controlsData.proveedoresPagoUsd,
+        
+        // Pagos Varios controls
+        maxAmountPerBatchVariosSoles: controlsData.variosLoteSoles,
+        maxAmountPerBatchVariosDollars: controlsData.variosLoteUsd,
+        maxAmountPerPaymentVariosSoles: controlsData.variosPagoSoles,
+        maxAmountPerPaymentVariosDollars: controlsData.variosPagoUsd,
         
         // Additional information
         maxDaysProviders: additionalData.maxDaysProviders,

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Printer } from "lucide-react";
@@ -232,51 +231,50 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
 
       pdf.setFont('helvetica', 'normal');
 
-      // Filas de datos
-      const services = ['Remuneraciones', 'Proveedores', 'Pagos Varios'];
-      services.forEach((service, index) => {
-        pdf.rect(margin, yPosition, colWidths[0], rowHeight);
-        pdf.text(service, margin + 2, yPosition + 5);
-        
-        // Agregar datos si están disponibles
-        const dataMap = {
-          0: { // Remuneraciones
-            soles_lote: companyData.maxAmountPerBatchSoles || '',
-            dolares_lote: companyData.maxAmountPerBatchDollars || '',
-            soles_pago: companyData.maxAmountPerPaymentSoles || '',
-            dolares_pago: companyData.maxAmountPerPaymentDollars || ''
-          },
-          1: { // Proveedores
-            soles_lote: '',
-            dolares_lote: '',
-            soles_pago: '',
-            dolares_pago: ''
-          },
-          2: { // Pagos Varios
-            soles_lote: '',
-            dolares_lote: '',
-            soles_pago: '',
-            dolares_pago: ''
-          }
-        };
+      // Filas de datos - now properly mapping all controls data
+      const controlsMapping = [
+        {
+          name: 'Remuneraciones',
+          soles_lote: companyData.maxAmountPerBatchSoles || '',
+          dolares_lote: companyData.maxAmountPerBatchDollars || '',
+          soles_pago: companyData.maxAmountPerPaymentSoles || '',
+          dolares_pago: companyData.maxAmountPerPaymentDollars || ''
+        },
+        {
+          name: 'Proveedores',
+          soles_lote: companyData.maxAmountPerBatchProveedoresSoles || '',
+          dolares_lote: companyData.maxAmountPerBatchProveedoresDollars || '',
+          soles_pago: companyData.maxAmountPerPaymentProveedoresSoles || '',
+          dolares_pago: companyData.maxAmountPerPaymentProveedoresDollars || ''
+        },
+        {
+          name: 'Pagos Varios',
+          soles_lote: companyData.maxAmountPerBatchVariosSoles || '',
+          dolares_lote: companyData.maxAmountPerBatchVariosDollars || '',
+          soles_pago: companyData.maxAmountPerPaymentVariosSoles || '',
+          dolares_pago: companyData.maxAmountPerPaymentVariosDollars || ''
+        }
+      ];
 
-        const data = dataMap[index as keyof typeof dataMap];
+      controlsMapping.forEach((control) => {
+        pdf.rect(margin, yPosition, colWidths[0], rowHeight);
+        pdf.text(control.name, margin + 2, yPosition + 5);
         
         // S/ Lote
         pdf.rect(margin + colWidths[0], yPosition, colWidths[1], rowHeight);
-        pdf.text(data.soles_lote, margin + colWidths[0] + 2, yPosition + 5);
+        pdf.text(control.soles_lote, margin + colWidths[0] + 2, yPosition + 5);
         
         // $ Lote
         pdf.rect(margin + colWidths[0] + colWidths[1], yPosition, colWidths[2], rowHeight);
-        pdf.text(data.dolares_lote, margin + colWidths[0] + colWidths[1] + 2, yPosition + 5);
+        pdf.text(control.dolares_lote, margin + colWidths[0] + colWidths[1] + 2, yPosition + 5);
         
         // S/ Pago
         pdf.rect(margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition, colWidths[3], rowHeight);
-        pdf.text(data.soles_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPosition + 5);
+        pdf.text(control.soles_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPosition + 5);
         
         // $ Pago
         pdf.rect(margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], yPosition, colWidths[4], rowHeight);
-        pdf.text(data.dolares_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2, yPosition + 5);
+        pdf.text(control.dolares_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2, yPosition + 5);
         
         yPosition += rowHeight;
       });
@@ -682,11 +680,11 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
                     {companyData.accountType === 'ahorro' && companyData.currency === 'soles' ? 'X' : ''}
                   </div>
                   <span className="text-sm">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
                     {companyData.accountType === 'corriente' && companyData.currency === 'soles' ? 'X' : ''}
                   </div>
                   <span className="text-sm">Corriente S/</span>
@@ -697,11 +695,11 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
                     {companyData.accountType === 'ahorro' && companyData.currency === 'dolares' ? 'X' : ''}
                   </div>
                   <span className="text-sm">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
                     {companyData.accountType === 'corriente' && companyData.currency === 'dolares' ? 'X' : ''}
                   </div>
                   <span className="text-sm">Corriente $</span>
@@ -715,7 +713,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               <p className="text-xs mt-2">Nota: Esta es la cuenta principal de cargo de comisiones.</p>
             </div>
 
-            {/* Controles Opcionales */}
+            {/* Controles Opcionales - Updated to show all controls */}
             <div className="mb-6">
               <h3 className="font-bold text-sm mb-3">Controles Opcionales (Si no se requieren controles, colocar "Sin límites" o "SL", caso contrario se rechazará la solicitud)</h3>
               
@@ -745,17 +743,17 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                     </tr>
                     <tr>
                       <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Proveedores</td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchProveedoresSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchProveedoresDollars || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentProveedoresSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentProveedoresDollars || ''}</td>
                     </tr>
                     <tr>
                       <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Pagos Varios</td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchVariosSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchVariosDollars || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentVariosSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentVariosDollars || ''}</td>
                     </tr>
                   </tbody>
                 </table>
