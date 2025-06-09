@@ -62,9 +62,9 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
     maxDaysProviders: "",
     maxDaysVarios: "",
     consolidateProveedoresSi: false,
-    consolidateProveedoresNo: false,
+    consolidateProveedoresNo: true, // Default to "No"
     consolidateVariosSi: false,
-    consolidateVariosNo: false,
+    consolidateVariosNo: true, // Default to "No"
     empresaSoles: "",
     empresaUsd: "",
     proveedorSoles: "",
@@ -78,24 +78,112 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
     email2: ""
   });
 
-  const [errors, setErrors] = useState<Partial<CompanyData>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Helper function to validate currency amounts
+  const validateCurrencyControls = (service: string): string[] => {
+    const validationErrors: string[] = [];
+    const hasSoles = accountData.ahorroSoles || accountData.corrienteSoles;
+    const hasDollars = accountData.ahorroUsd || accountData.corrienteUsd;
+
+    if (hasSoles) {
+      const loteField = `${service}LoteSoles`;
+      const pagoField = `${service}PagoSoles`;
+      const loteValue = parseFloat(controlsData[loteField as keyof typeof controlsData] || "0");
+      const pagoValue = parseFloat(controlsData[pagoField as keyof typeof controlsData] || "0");
+
+      if (!controlsData[loteField as keyof typeof controlsData] || loteValue <= 0) {
+        validationErrors.push(`Monto máximo por lote en soles es requerido para ${service}`);
+      }
+      if (!controlsData[pagoField as keyof typeof controlsData] || pagoValue <= 0) {
+        validationErrors.push(`Monto máximo por pago en soles es requerido para ${service}`);
+      }
+      if (loteValue > 0 && pagoValue > 0 && pagoValue >= loteValue) {
+        validationErrors.push(`El monto por pago debe ser menor al monto por lote (S/) para ${service}`);
+      }
+    }
+
+    if (hasDollars) {
+      const loteField = `${service}LoteUsd`;
+      const pagoField = `${service}PagoUsd`;
+      const loteValue = parseFloat(controlsData[loteField as keyof typeof controlsData] || "0");
+      const pagoValue = parseFloat(controlsData[pagoField as keyof typeof controlsData] || "0");
+
+      if (!controlsData[loteField as keyof typeof controlsData] || loteValue <= 0) {
+        validationErrors.push(`Monto máximo por lote en dólares es requerido para ${service}`);
+      }
+      if (!controlsData[pagoField as keyof typeof controlsData] || pagoValue <= 0) {
+        validationErrors.push(`Monto máximo por pago en dólares es requerido para ${service}`);
+      }
+      if (loteValue > 0 && pagoValue > 0 && pagoValue >= loteValue) {
+        validationErrors.push(`El monto por pago debe ser menor al monto por lote ($) para ${service}`);
+      }
+    }
+
+    return validationErrors;
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<CompanyData> = {};
+    const newErrors: Record<string, string> = {};
+    const validationErrors: string[] = [];
 
+    // Basic form validation
     if (!formData.companyName.trim()) newErrors.companyName = "Razón Social es requerida";
     if (!formData.ruc.trim()) newErrors.ruc = "RUC/DNI es requerido";
-    if (!contactData.contactName.trim()) newErrors.legalRepresentative = "Nombre de contacto es requerido";
-    if (!contactData.contactPhone.trim()) newErrors.phone = "Teléfono de contacto es requerido";
-    if (!contactData.email1.trim()) newErrors.email = "Al menos un correo es requerido";
+    if (!contactData.contactName.trim()) newErrors.contactName = "Nombre de contacto es requerido";
+    if (!contactData.contactPhone.trim()) newErrors.contactPhone = "Teléfono de contacto es requerido";
+    if (!contactData.email1.trim()) newErrors.email1 = "Al menos un correo es requerido";
 
     if (formData.ruc && !/^\d{8,11}$/.test(formData.ruc)) {
       newErrors.ruc = "RUC debe tener 11 dígitos o DNI 8 dígitos";
     }
 
     if (contactData.email1 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactData.email1)) {
-      newErrors.email = "Email 1 no válido";
+      newErrors.email1 = "Email 1 no válido";
     }
+
+    // Service selection validation
+    if (!serviceData.remuneraciones && !serviceData.proveedores && !serviceData.pagosVarios) {
+      validationErrors.push("Debe seleccionar al menos un servicio");
+    }
+
+    // Account validation - must have at least one account
+    if (!accountData.ahorroSoles && !accountData.corrienteSoles && !accountData.ahorroUsd && !accountData.corrienteUsd) {
+      validationErrors.push("Debe seleccionar al menos una cuenta de cargo");
+    }
+
+    // Currency controls validation for selected services
+    if (serviceData.remuneraciones) {
+      validationErrors.push(...validateCurrencyControls("remuneraciones"));
+    }
+    if (serviceData.proveedores) {
+      validationErrors.push(...validateCurrencyControls("proveedores"));
+    }
+    if (serviceData.pagosVarios) {
+      validationErrors.push(...validateCurrencyControls("varios"));
+    }
+
+    // Max days validation for providers and payments
+    if (serviceData.proveedores || serviceData.pagosVarios) {
+      if (serviceData.proveedores && additionalData.maxDaysProviders) {
+        const maxDays = parseInt(additionalData.maxDaysProviders);
+        if (isNaN(maxDays) || maxDays > 120 || maxDays < 1) {
+          newErrors.maxDaysProviders = "El número máximo de días debe ser entre 1 y 120";
+        }
+      }
+      
+      if (serviceData.pagosVarios && additionalData.maxDaysVarios) {
+        const maxDays = parseInt(additionalData.maxDaysVarios);
+        if (isNaN(maxDays) || maxDays > 120 || maxDays < 1) {
+          newErrors.maxDaysVarios = "El número máximo de días debe ser entre 1 y 120";
+        }
+      }
+    }
+
+    // Add validation errors to newErrors
+    validationErrors.forEach((error, index) => {
+      newErrors[`validation_${index}`] = error;
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -192,9 +280,11 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
       
       onSubmit(completeData);
     } else {
+      // Show validation errors
+      const errorMessages = Object.values(errors).join(", ");
       toast({
         title: "Errores en el formulario",
-        description: "Por favor, corrija los errores antes de continuar.",
+        description: errorMessages,
         variant: "destructive",
       });
     }
@@ -219,7 +309,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
         break;
     }
     
-    if (errors[field as keyof CompanyData]) {
+    if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
@@ -233,7 +323,18 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
   };
 
   const handleConsolidateChange = (field: string, checked: boolean) => {
-    setAdditionalData(prev => ({ ...prev, [field]: checked }));
+    // Ensure mutual exclusivity for consolidation options
+    if (field === 'consolidateProveedoresSi' && checked) {
+      setAdditionalData(prev => ({ ...prev, consolidateProveedoresSi: true, consolidateProveedoresNo: false }));
+    } else if (field === 'consolidateProveedoresNo' && checked) {
+      setAdditionalData(prev => ({ ...prev, consolidateProveedoresSi: false, consolidateProveedoresNo: true }));
+    } else if (field === 'consolidateVariosSi' && checked) {
+      setAdditionalData(prev => ({ ...prev, consolidateVariosSi: true, consolidateVariosNo: false }));
+    } else if (field === 'consolidateVariosNo' && checked) {
+      setAdditionalData(prev => ({ ...prev, consolidateVariosSi: false, consolidateVariosNo: true }));
+    } else {
+      setAdditionalData(prev => ({ ...prev, [field]: checked }));
+    }
   };
 
   return (
@@ -247,6 +348,18 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           
+          {/* Show validation errors */}
+          {Object.keys(errors).length > 0 && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded p-4">
+              <h4 className="font-medium text-destructive mb-2">Errores de validación:</h4>
+              <ul className="text-sm text-destructive space-y-1">
+                {Object.values(errors).map((error, index) => (
+                  <li key={index}>• {error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Información de la Empresa */}
           <div className="space-y-4">
             <h3 className="font-bold text-base text-interbank-primary">Información de la Empresa</h3>
@@ -296,6 +409,9 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                     className="border-0 rounded-none h-10 focus-visible:ring-0"
                   />
                 </div>
+                {errors.contactName && (
+                  <p className="text-sm text-destructive">{errors.contactName}</p>
+                )}
               </div>
 
               <div>
@@ -307,6 +423,9 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                     className="border-0 rounded-none h-10 focus-visible:ring-0"
                   />
                 </div>
+                {errors.contactPhone && (
+                  <p className="text-sm text-destructive">{errors.contactPhone}</p>
+                )}
               </div>
             </div>
 
@@ -320,6 +439,9 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                     className="border-0 rounded-none h-10 focus-visible:ring-0"
                   />
                 </div>
+                {errors.email1 && (
+                  <p className="text-sm text-destructive">{errors.email1}</p>
+                )}
               </div>
 
               <div>
@@ -501,6 +623,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.remuneracionesLoteSoles}
                         onChange={(e) => handleInputChange('remuneracionesLoteSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.remuneraciones ? "Requerido" : "N/A"}
+                        disabled={!serviceData.remuneraciones}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -508,6 +632,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.remuneracionesLoteUsd}
                         onChange={(e) => handleInputChange('remuneracionesLoteUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.remuneraciones ? "Requerido" : "N/A"}
+                        disabled={!serviceData.remuneraciones}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -515,6 +641,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.remuneracionesPagoSoles}
                         onChange={(e) => handleInputChange('remuneracionesPagoSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.remuneraciones ? "Requerido" : "N/A"}
+                        disabled={!serviceData.remuneraciones}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -522,6 +650,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.remuneracionesPagoUsd}
                         onChange={(e) => handleInputChange('remuneracionesPagoUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.remuneraciones ? "Requerido" : "N/A"}
+                        disabled={!serviceData.remuneraciones}
                       />
                     </td>
                   </tr>
@@ -532,6 +662,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.proveedoresLoteSoles}
                         onChange={(e) => handleInputChange('proveedoresLoteSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.proveedores ? "Requerido" : "N/A"}
+                        disabled={!serviceData.proveedores}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -539,6 +671,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.proveedoresLoteUsd}
                         onChange={(e) => handleInputChange('proveedoresLoteUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.proveedores ? "Requerido" : "N/A"}
+                        disabled={!serviceData.proveedores}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -546,6 +680,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.proveedoresPagoSoles}
                         onChange={(e) => handleInputChange('proveedoresPagoSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.proveedores ? "Requerido" : "N/A"}
+                        disabled={!serviceData.proveedores}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -553,6 +689,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.proveedoresPagoUsd}
                         onChange={(e) => handleInputChange('proveedoresPagoUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.proveedores ? "Requerido" : "N/A"}
+                        disabled={!serviceData.proveedores}
                       />
                     </td>
                   </tr>
@@ -563,6 +701,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.variosLoteSoles}
                         onChange={(e) => handleInputChange('variosLoteSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.pagosVarios ? "Requerido" : "N/A"}
+                        disabled={!serviceData.pagosVarios}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -570,6 +710,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.variosLoteUsd}
                         onChange={(e) => handleInputChange('variosLoteUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.pagosVarios ? "Requerido" : "N/A"}
+                        disabled={!serviceData.pagosVarios}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -577,6 +719,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.variosPagoSoles}
                         onChange={(e) => handleInputChange('variosPagoSoles', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.pagosVarios ? "Requerido" : "N/A"}
+                        disabled={!serviceData.pagosVarios}
                       />
                     </td>
                     <td className="border-2 border-black p-0">
@@ -584,6 +728,8 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         value={controlsData.variosPagoUsd}
                         onChange={(e) => handleInputChange('variosPagoUsd', e.target.value, 'controlsData')}
                         className="border-0 bg-transparent rounded-none h-8"
+                        placeholder={serviceData.pagosVarios ? "Requerido" : "N/A"}
+                        disabled={!serviceData.pagosVarios}
                       />
                     </td>
                   </tr>
@@ -592,13 +738,13 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
             </div>
           </div>
 
-          {/* Completar solo en caso de elegir el servicio de Pago Proveedores y/o Pagos Varios */}
+          {/* Updated Additional Information section */}
           <div className="space-y-4">
             <h3 className="font-bold text-base text-interbank-primary">Completar solo en caso de elegir el servicio de Pago Proveedores y/o Pagos Varios</h3>
             
             {/* Número de días máximo */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Número de días máximo para el cobro de cheques y ordenes de pagos ( )</Label>
+              <Label className="text-sm font-medium">Número de días máximo para el cobro de cheques y ordenes de pagos (Máximo 120 días)</Label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-4">
                   <span className="text-sm w-20">Proveedores</span>
@@ -607,8 +753,16 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                       value={additionalData.maxDaysProviders}
                       onChange={(e) => handleInputChange('maxDaysProviders', e.target.value, 'additionalData')}
                       className="border-0 rounded-none h-8 focus-visible:ring-0 text-sm"
+                      placeholder="1-120"
+                      type="number"
+                      min="1"
+                      max="120"
+                      disabled={!serviceData.proveedores}
                     />
                   </div>
+                  {errors.maxDaysProviders && (
+                    <p className="text-sm text-destructive">{errors.maxDaysProviders}</p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm w-20">Pagos Varios</span>
@@ -617,17 +771,25 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                       value={additionalData.maxDaysVarios}
                       onChange={(e) => handleInputChange('maxDaysVarios', e.target.value, 'additionalData')}
                       className="border-0 rounded-none h-8 focus-visible:ring-0 text-sm"
+                      placeholder="1-120"
+                      type="number"
+                      min="1"
+                      max="120"
+                      disabled={!serviceData.pagosVarios}
                     />
                   </div>
+                  {errors.maxDaysVarios && (
+                    <p className="text-sm text-destructive">{errors.maxDaysVarios}</p>
+                  )}
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">( ) Tiempo Máximo 120 días. Culminado el plazo los cheques y órdenes de pago se revocan y se devuelven los fondos a la cuenta de cargo de la operación. En caso no indicar días, se configurará con el tiempo máximo.</p>
+              <p className="text-xs text-muted-foreground">Tiempo Máximo 120 días. Culminado el plazo los cheques y órdenes de pago se revocan y se devuelven los fondos a la cuenta de cargo de la operación. En caso no indicar días, se configurará con el tiempo máximo.</p>
             </div>
 
             {/* Opción de consolidar Facturas */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque( )</Label>
-              <p className="text-xs text-muted-foreground">(Marcar con "X" la opción que desea seleccionar)</p>
+              <Label className="text-sm font-medium">Opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque</Label>
+              <p className="text-xs text-muted-foreground">(Marcar con "X" la opción que desea seleccionar - Por defecto: NO)</p>
               
               <div className="space-y-2">
                 <div className="flex items-center space-x-8">
@@ -639,6 +801,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         onCheckedChange={(checked) => 
                           handleConsolidateChange('consolidateProveedoresSi', checked as boolean)
                         }
+                        disabled={!serviceData.proveedores}
                       />
                       <Label className="text-sm">Sí</Label>
                     </div>
@@ -648,6 +811,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         onCheckedChange={(checked) => 
                           handleConsolidateChange('consolidateProveedoresNo', checked as boolean)
                         }
+                        disabled={!serviceData.proveedores}
                       />
                       <Label className="text-sm">No</Label>
                     </div>
@@ -663,6 +827,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         onCheckedChange={(checked) => 
                           handleConsolidateChange('consolidateVariosSi', checked as boolean)
                         }
+                        disabled={!serviceData.pagosVarios}
                       />
                       <Label className="text-sm">Sí</Label>
                     </div>
@@ -672,80 +837,95 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                         onCheckedChange={(checked) => 
                           handleConsolidateChange('consolidateVariosNo', checked as boolean)
                         }
+                        disabled={!serviceData.pagosVarios}
                       />
                       <Label className="text-sm">No</Label>
                     </div>
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">( ) En caso no marque una opción, se considera que no desea la opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque</p>
+              <p className="text-xs text-muted-foreground">En caso no marque una opción, se considera que no desea la opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque</p>
             </div>
 
-            {/* Distribución Comisión Cheque Gerencia */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Distribución Comisión Cheque Gerencia (Ordenante/Pagador) ( )</Label>
-              
-              <div className="overflow-x-auto">
-                <table className="border-collapse text-xs max-w-md">
-                  <thead>
-                    <tr>
-                      <th className="border-2 border-black p-2 text-left bg-gray-50"></th>
-                      <th className="border-2 border-black p-2 text-center bg-gray-50">S/</th>
-                      <th className="border-2 border-black p-2 text-center bg-gray-50">$</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border-2 border-black p-2 font-medium bg-gray-50">Empresa</td>
-                      <td className="border-2 border-black p-0">
-                        <div className="flex items-center">
-                          <Input
-                            value={additionalData.empresaSoles}
-                            onChange={(e) => handleInputChange('empresaSoles', e.target.value, 'additionalData')}
-                            className="border-0 bg-transparent rounded-none h-8 w-16"
-                          />
-                          <span className="px-1">%</span>
-                        </div>
-                      </td>
-                      <td className="border-2 border-black p-0">
-                        <div className="flex items-center">
-                          <Input
-                            value={additionalData.empresaUsd}
-                            onChange={(e) => handleInputChange('empresaUsd', e.target.value, 'additionalData')}
-                            className="border-0 bg-transparent rounded-none h-8 w-16"
-                          />
-                          <span className="px-1">%</span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border-2 border-black p-2 font-medium bg-gray-50">Proveedor</td>
-                      <td className="border-2 border-black p-0">
-                        <div className="flex items-center">
-                          <Input
-                            value={additionalData.proveedorSoles}
-                            onChange={(e) => handleInputChange('proveedorSoles', e.target.value, 'additionalData')}
-                            className="border-0 bg-transparent rounded-none h-8 w-16"
-                          />
-                          <span className="px-1">%</span>
-                        </div>
-                      </td>
-                      <td className="border-2 border-black p-0">
-                        <div className="flex items-center">
-                          <Input
-                            value={additionalData.proveedorUsd}
-                            onChange={(e) => handleInputChange('proveedorUsd', e.target.value, 'additionalData')}
-                            className="border-0 bg-transparent rounded-none h-8 w-16"
-                          />
-                          <span className="px-1">%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            {/* Distribución Comisión Cheque Gerencia - Only show when consolidation is enabled */}
+            {(additionalData.consolidateProveedoresSi || additionalData.consolidateVariosSi) && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Distribución Comisión Cheque Gerencia (Ordenante/Pagador)</Label>
+                
+                <div className="overflow-x-auto">
+                  <table className="border-collapse text-xs max-w-md">
+                    <thead>
+                      <tr>
+                        <th className="border-2 border-black p-2 text-left bg-gray-50"></th>
+                        <th className="border-2 border-black p-2 text-center bg-gray-50">S/</th>
+                        <th className="border-2 border-black p-2 text-center bg-gray-50">$</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border-2 border-black p-2 font-medium bg-gray-50">Empresa</td>
+                        <td className="border-2 border-black p-0">
+                          <div className="flex items-center">
+                            <Input
+                              value={additionalData.empresaSoles}
+                              onChange={(e) => handleInputChange('empresaSoles', e.target.value, 'additionalData')}
+                              className="border-0 bg-transparent rounded-none h-8 w-16"
+                              type="number"
+                              min="0"
+                              max="100"
+                            />
+                            <span className="px-1">%</span>
+                          </div>
+                        </td>
+                        <td className="border-2 border-black p-0">
+                          <div className="flex items-center">
+                            <Input
+                              value={additionalData.empresaUsd}
+                              onChange={(e) => handleInputChange('empresaUsd', e.target.value, 'additionalData')}
+                              className="border-0 bg-transparent rounded-none h-8 w-16"
+                              type="number"
+                              min="0"
+                              max="100"
+                            />
+                            <span className="px-1">%</span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border-2 border-black p-2 font-medium bg-gray-50">Proveedor</td>
+                        <td className="border-2 border-black p-0">
+                          <div className="flex items-center">
+                            <Input
+                              value={additionalData.proveedorSoles}
+                              onChange={(e) => handleInputChange('proveedorSoles', e.target.value, 'additionalData')}
+                              className="border-0 bg-transparent rounded-none h-8 w-16"
+                              type="number"
+                              min="0"
+                              max="100"
+                            />
+                            <span className="px-1">%</span>
+                          </div>
+                        </td>
+                        <td className="border-2 border-black p-0">
+                          <div className="flex items-center">
+                            <Input
+                              value={additionalData.proveedorUsd}
+                              onChange={(e) => handleInputChange('proveedorUsd', e.target.value, 'additionalData')}
+                              className="border-0 bg-transparent rounded-none h-8 w-16"
+                              type="number"
+                              min="0"
+                              max="100"
+                            />
+                            <span className="px-1">%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-muted-foreground">Al no elegir distribución de comisión será asumida en su totalidad por el Cliente</p>
               </div>
-              <p className="text-xs text-muted-foreground">( ) Al no elegir distribución de comisión será asumida en su totalidad por el Cliente</p>
-            </div>
+            )}
           </div>
 
           <div className="flex justify-end pt-6">
