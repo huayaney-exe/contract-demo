@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,9 +68,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
     empresaSoles: "",
     empresaUsd: "",
     proveedorSoles: "",
-    proveedorUsd: "",
-    bankCode: "",
-    receivingStore: ""
+    proveedorUsd: ""
   });
 
   const [contactData, setContactData] = useState({
@@ -115,6 +112,10 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
       
       const completeData = {
         ...formData,
+        contactName: contactData.contactName,
+        contactPhone: contactData.contactPhone,
+        contactEmail1: contactData.email1,
+        contactEmail2: contactData.email2,
         legalRepresentative: contactData.contactName,
         phone: contactData.contactPhone,
         email: contactData.email1
@@ -675,35 +676,6 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                 </table>
               </div>
               <p className="text-xs text-muted-foreground">( ) Al no elegir distribución de comisión será asumida en su totalidad por el Cliente</p>
-            </div>
-          </div>
-
-          {/* Información a completar por INTERBANK */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-base text-interbank-primary">Información a completar por INTERBANK</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Código único:</Label>
-                <div className="border-2 border-black mt-1">
-                  <Input
-                    value={additionalData.bankCode}
-                    onChange={(e) => handleInputChange('bankCode', e.target.value, 'additionalData')}
-                    className="border-0 rounded-none h-10 focus-visible:ring-0"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium">Tienda Receptora:</Label>
-                <div className="border-2 border-black mt-1">
-                  <Input
-                    value={additionalData.receivingStore}
-                    onChange={(e) => handleInputChange('receivingStore', e.target.value, 'additionalData')}
-                    className="border-0 rounded-none h-10 focus-visible:ring-0"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
