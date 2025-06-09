@@ -258,8 +258,8 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                   <thead>
                     <tr>
                       <th className="border-2 border-gray-800 p-2 text-left"></th>
-                      <th className="border-2 border-gray-800 p-2 text-center" colspan="2">Control de Monto Máximo por Lote</th>
-                      <th className="border-2 border-gray-800 p-2 text-center" colspan="2">Control de Monto Máximo por Pago</th>
+                      <th className="border-2 border-gray-800 p-2 text-center" colSpan={2}>Control de Monto Máximo por Lote</th>
+                      <th className="border-2 border-gray-800 p-2 text-center" colSpan={2}>Control de Monto Máximo por Pago</th>
                     </tr>
                     <tr>
                       <th className="border-2 border-gray-800 p-2 text-left"></th>
