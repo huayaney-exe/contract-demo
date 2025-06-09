@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
 import { CompanyData } from "@/pages/Index";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
@@ -70,13 +70,13 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       
       // Razón Social
       pdf.text('Razón Social / Nombre del Cliente:', margin, yPosition);
-      yPosition += 2;
+      yPosition += 5;
       drawBox(margin, yPosition, pageWidth - 2 * margin, 8, companyData.companyName);
       yPosition += 12;
 
       // RUC / DNI
       pdf.text('RUC / DNI:', margin, yPosition);
-      yPosition += 2;
+      yPosition += 5;
       drawBox(margin, yPosition, pageWidth - 2 * margin, 8, companyData.ruc);
       yPosition += 15;
 
@@ -91,7 +91,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       const halfWidth = (pageWidth - 3 * margin) / 2;
       pdf.text('Nombre Contacto:', margin, yPosition);
       pdf.text('Teléfono:', margin + halfWidth + 10, yPosition);
-      yPosition += 2;
+      yPosition += 5;
       drawBox(margin, yPosition, halfWidth, 8, companyData.contactName || companyData.legalRepresentative);
       drawBox(margin + halfWidth + 10, yPosition, halfWidth, 8, companyData.contactPhone || companyData.phone);
       yPosition += 12;
@@ -99,7 +99,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       // Correo 1 y Correo 2 en la misma línea
       pdf.text('Correo 1:', margin, yPosition);
       pdf.text('Correo 2:', margin + halfWidth + 10, yPosition);
-      yPosition += 2;
+      yPosition += 5;
       drawBox(margin, yPosition, halfWidth, 8, companyData.contactEmail1 || companyData.email);
       drawBox(margin + halfWidth + 10, yPosition, halfWidth, 8, companyData.contactEmail2 || '');
       yPosition += 15;
@@ -146,6 +146,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       // Notas explicativas
       pdf.setFontSize(8);
       yPosition = addText('(1) Incluye pagos a Persona Jurídica y Persona Natural con documento oficial de identidad, permite realizar pagos mediante abono en cuenta mismo banco, transferencias CCI/BCR y cheques de gerencia.', margin, yPosition, pageWidth - 2 * margin, 8);
+      yPosition += 3;
       yPosition = addText('(2) Incluye Persona Natural con documento oficial de identidad, permite realizar pagos en efectivo (Orden de Pago), cheques de gerencia y abono en cuenta)', margin, yPosition, pageWidth - 2 * margin, 8);
       yPosition += 8;
 
@@ -202,7 +203,6 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       yPosition += 5;
 
       // Tabla de controles opcionales
-      const tableStartY = yPosition;
       const colWidths = [40, 30, 30, 30, 30];
       const rowHeight = 8;
 
@@ -234,14 +234,49 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
 
       // Filas de datos
       const services = ['Remuneraciones', 'Proveedores', 'Pagos Varios'];
-      services.forEach((service) => {
+      services.forEach((service, index) => {
         pdf.rect(margin, yPosition, colWidths[0], rowHeight);
         pdf.text(service, margin + 2, yPosition + 5);
         
-        for (let i = 1; i < 5; i++) {
-          const x = margin + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-          pdf.rect(x, yPosition, colWidths[i], rowHeight);
-        }
+        // Agregar datos si están disponibles
+        const dataMap = {
+          0: { // Remuneraciones
+            soles_lote: companyData.maxAmountPerBatchSoles || '',
+            dolares_lote: companyData.maxAmountPerBatchDollars || '',
+            soles_pago: companyData.maxAmountPerPaymentSoles || '',
+            dolares_pago: companyData.maxAmountPerPaymentDollars || ''
+          },
+          1: { // Proveedores
+            soles_lote: '',
+            dolares_lote: '',
+            soles_pago: '',
+            dolares_pago: ''
+          },
+          2: { // Pagos Varios
+            soles_lote: '',
+            dolares_lote: '',
+            soles_pago: '',
+            dolares_pago: ''
+          }
+        };
+
+        const data = dataMap[index as keyof typeof dataMap];
+        
+        // S/ Lote
+        pdf.rect(margin + colWidths[0], yPosition, colWidths[1], rowHeight);
+        pdf.text(data.soles_lote, margin + colWidths[0] + 2, yPosition + 5);
+        
+        // $ Lote
+        pdf.rect(margin + colWidths[0] + colWidths[1], yPosition, colWidths[2], rowHeight);
+        pdf.text(data.dolares_lote, margin + colWidths[0] + colWidths[1] + 2, yPosition + 5);
+        
+        // S/ Pago
+        pdf.rect(margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition, colWidths[3], rowHeight);
+        pdf.text(data.soles_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + 2, yPosition + 5);
+        
+        // $ Pago
+        pdf.rect(margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], yPosition, colWidths[4], rowHeight);
+        pdf.text(data.dolares_pago, margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2, yPosition + 5);
         
         yPosition += rowHeight;
       });
@@ -313,7 +348,6 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       yPosition += 5;
 
       // Tabla de distribución
-      const commissionTableY = yPosition;
       const commissionColWidths = [30, 20, 20];
       
       // Headers
@@ -332,18 +366,18 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
       pdf.rect(margin, yPosition, commissionColWidths[0], rowHeight);
       pdf.text('Empresa', margin + 2, yPosition + 5);
       pdf.rect(margin + commissionColWidths[0], yPosition, commissionColWidths[1], rowHeight);
-      pdf.text('% ', margin + commissionColWidths[0] + 2, yPosition + 5);
+      pdf.text(companyData.commissionDistributionCompanySoles ? `${companyData.commissionDistributionCompanySoles}%` : '% ', margin + commissionColWidths[0] + 2, yPosition + 5);
       pdf.rect(margin + commissionColWidths[0] + commissionColWidths[1], yPosition, commissionColWidths[2], rowHeight);
-      pdf.text('% ', margin + commissionColWidths[0] + commissionColWidths[1] + 2, yPosition + 5);
+      pdf.text(companyData.commissionDistributionCompanyDollars ? `${companyData.commissionDistributionCompanyDollars}%` : '% ', margin + commissionColWidths[0] + commissionColWidths[1] + 2, yPosition + 5);
       yPosition += rowHeight;
 
       // Proveedor
       pdf.rect(margin, yPosition, commissionColWidths[0], rowHeight);
       pdf.text('Proveedor', margin + 2, yPosition + 5);
       pdf.rect(margin + commissionColWidths[0], yPosition, commissionColWidths[1], rowHeight);
-      pdf.text('% ', margin + commissionColWidths[0] + 2, yPosition + 5);
+      pdf.text(companyData.commissionDistributionProviderSoles ? `${companyData.commissionDistributionProviderSoles}%` : '% ', margin + commissionColWidths[0] + 2, yPosition + 5);
       pdf.rect(margin + commissionColWidths[0] + commissionColWidths[1], yPosition, commissionColWidths[2], rowHeight);
-      pdf.text('% ', margin + commissionColWidths[0] + commissionColWidths[1] + 2, yPosition + 5);
+      pdf.text(companyData.commissionDistributionProviderDollars ? `${companyData.commissionDistributionProviderDollars}%` : '% ', margin + commissionColWidths[0] + commissionColWidths[1] + 2, yPosition + 5);
       yPosition += 12;
 
       pdf.setFontSize(8);
@@ -522,6 +556,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
             Descargar PDF
           </Button>
           <Button onClick={handlePrint} size="lg" variant="outline" className="border-interbank-primary text-interbank-primary hover:bg-interbank-light">
+            <Printer className="w-4 h-4 mr-2" />
             Imprimir Anexo
           </Button>
         </div>
@@ -566,14 +601,14 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[120px]">Nombre Contacto:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {companyData.legalRepresentative}
+                    {companyData.contactName || companyData.legalRepresentative}
                   </div>
                 </div>
                 
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[80px]">Teléfono:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {companyData.phone}
+                    {companyData.contactPhone || companyData.phone}
                   </div>
                 </div>
               </div>
@@ -582,14 +617,14 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[80px]">Correo 1:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {companyData.email}
+                    {companyData.contactEmail1 || companyData.email}
                   </div>
                 </div>
                 
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[80px]">Correo 2:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {/* Campo para llenar */}
+                    {companyData.contactEmail2 || ''}
                   </div>
                 </div>
               </div>
@@ -601,26 +636,36 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">X</div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
+                    {companyData.isRemuneraciones ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Remuneraciones/CTS</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
+                    {companyData.isProveedores ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Proveedores (1)</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
+                    {companyData.isPagosVarios ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Pagos Varios (2)</span>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">X</div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
+                    {companyData.isNuevo ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Nuevo</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">
+                    {companyData.isModificacion ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Modificación ( ) Solo se completarán los campos a modificar</span>
                 </div>
               </div>
@@ -637,24 +682,32 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">X</div>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                    {companyData.accountType === 'ahorro' && companyData.currency === 'soles' ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                    {companyData.accountType === 'corriente' && companyData.currency === 'soles' ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Corriente S/</span>
                   <span className="text-sm">Nro. de cuenta</span>
                   <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
-                    {/* Campo para número de cuenta */}
+                    {companyData.currency === 'soles' ? companyData.accountNumber : ''}
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                    {companyData.accountType === 'ahorro' && companyData.currency === 'dolares' ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                    {companyData.accountType === 'corriente' && companyData.currency === 'dolares' ? 'X' : ''}
+                  </div>
                   <span className="text-sm">Corriente $</span>
                   <span className="text-sm">Nro. de Cuenta</span>
                   <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
-                    {/* Campo para número de cuenta */}
+                    {companyData.currency === 'dolares' ? companyData.accountNumber : ''}
                   </div>
                 </div>
               </div>
@@ -685,10 +738,10 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                   <tbody>
                     <tr>
                       <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Remuneraciones</td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
-                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerBatchDollars || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentSoles || ''}</td>
+                      <td className="border-2 border-gray-800 p-2 h-8">{companyData.maxAmountPerPaymentDollars || ''}</td>
                     </tr>
                     <tr>
                       <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Proveedores</td>
@@ -719,11 +772,15 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center">
                       <span className="text-sm mr-3 w-20">Proveedores</span>
-                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32"></div>
+                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32">
+                        {companyData.maxDaysProviders || ''}
+                      </div>
                     </div>
                     <div className="flex items-center">
                       <span className="text-sm mr-3 w-20">Pagos Varios</span>
-                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32"></div>
+                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32">
+                        {companyData.maxDaysPayments || ''}
+                      </div>
                     </div>
                   </div>
                   <p className="text-xs mt-2">( ) Tiempo Máximo 120 días. Culminado el plazo los cheques y órdenes de pago se revocan y se devuelven los fondos a la cuenta de cargo de la operación. En caso no indicar días, se configurará con el tiempo máximo.</p>
@@ -738,11 +795,15 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                     <div className="flex items-center space-x-4">
                       <span className="text-sm w-20">Proveedores</span>
                       <div className="flex items-center space-x-2">
-                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                          {companyData.consolidateInvoicesProviders === 'si' ? 'X' : ''}
+                        </div>
                         <span className="text-sm">Sí</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                          {companyData.consolidateInvoicesProviders === 'no' ? 'X' : ''}
+                        </div>
                         <span className="text-sm">No</span>
                       </div>
                     </div>
@@ -750,11 +811,15 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                     <div className="flex items-center space-x-4">
                       <span className="text-sm w-20">Pagos Varios</span>
                       <div className="flex items-center space-x-2">
-                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                          {companyData.consolidateInvoicesPayments === 'si' ? 'X' : ''}
+                        </div>
                         <span className="text-sm">Sí</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">
+                          {companyData.consolidateInvoicesPayments === 'no' ? 'X' : ''}
+                        </div>
                         <span className="text-sm">No</span>
                       </div>
                     </div>
@@ -778,13 +843,21 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                       <tbody>
                         <tr>
                           <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Empresa</td>
-                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
-                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">
+                            {companyData.commissionDistributionCompanySoles ? `${companyData.commissionDistributionCompanySoles}%` : '% '}
+                          </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">
+                            {companyData.commissionDistributionCompanyDollars ? `${companyData.commissionDistributionCompanyDollars}%` : '% '}
+                          </td>
                         </tr>
                         <tr>
                           <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Proveedor</td>
-                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
-                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">
+                            {companyData.commissionDistributionProviderSoles ? `${companyData.commissionDistributionProviderSoles}%` : '% '}
+                          </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">
+                            {companyData.commissionDistributionProviderDollars ? `${companyData.commissionDistributionProviderDollars}%` : '% '}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -802,14 +875,14 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[120px]">Código único:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {/* Campo para código único */}
+                    {companyData.uniqueCode || ''}
                   </div>
                 </div>
                 
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[120px]">Tienda Receptora:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {/* Campo para tienda receptora */}
+                    {companyData.receivingStore || ''}
                   </div>
                 </div>
               </div>
@@ -819,7 +892,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
             <div className="mb-6">
               <h3 className="font-bold text-sm mb-3">Información de la Empresa</h3>
               <div className="border-2 border-gray-800 p-4 min-h-[80px] bg-gray-50">
-                {/* Campo para información adicional de la empresa */}
+                {companyData.companyInfo || ''}
               </div>
             </div>
 
@@ -838,7 +911,9 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <div className="border-b-2 border-gray-800 mb-2 h-16"></div>
                 <p className="font-medium text-sm">Firma del banco</p>
                 <p className="text-sm">Tienda / Soporte Banca Comercial:</p>
-                <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 mt-1"></div>
+                <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 mt-1">
+                  {/* Campo para información del banco */}
+                </div>
               </div>
             </div>
 
