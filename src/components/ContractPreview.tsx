@@ -86,6 +86,9 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 height: 40px; 
                 margin-bottom: 5px; 
               }
+              table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+              th, td { border: 2px solid #000; padding: 5px; text-align: center; }
+              .text-left { text-align: left; }
               @media print { 
                 body { margin: 15px; } 
                 .no-print { display: none; }
@@ -109,13 +112,13 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al Formulario
         </Button>
-        <Button onClick={handlePrint} size="lg">
+        <Button onClick={handlePrint} size="lg" className="bg-interbank-primary hover:bg-interbank-accent">
           Imprimir Anexo
         </Button>
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader className="bg-primary text-primary-foreground">
+        <CardHeader className="bg-interbank-primary text-white">
           <CardTitle className="text-2xl">Vista Previa del Anexo</CardTitle>
         </CardHeader>
         <CardContent className="p-8">
@@ -131,15 +134,15 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
             {/* Información básica */}
             <div className="space-y-4 mb-6">
               <div className="flex items-center">
-                <span className="text-sm font-medium mr-3 min-w-[200px]">Razón Social / Nombre del Cliente:</span>
-                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1 max-w-[400px]">
+                <span className="text-sm font-medium mr-3 min-w-[250px]">Razón Social / Nombre del Cliente:</span>
+                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
                   {companyData.companyName}
                 </div>
               </div>
               
               <div className="flex items-center">
-                <span className="text-sm font-medium mr-3 min-w-[200px]">RUC / DNI:</span>
-                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1 max-w-[400px]">
+                <span className="text-sm font-medium mr-3 min-w-[250px]">RUC / DNI:</span>
+                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
                   {companyData.ruc}
                 </div>
               </div>
@@ -176,7 +179,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <div className="flex items-center">
                   <span className="text-sm font-medium mr-3 min-w-[80px]">Correo 2:</span>
                   <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
-                    {/* Campo vacío para llenar */}
+                    {/* Campo para llenar */}
                   </div>
                 </div>
               </div>
@@ -188,7 +191,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">X</div>
                   <span className="text-sm">Remuneraciones/CTS</span>
                 </div>
                 <div className="flex items-center">
@@ -203,7 +206,7 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center flex items-center justify-center">X</div>
                   <span className="text-sm">Nuevo</span>
                 </div>
                 <div className="flex items-center">
@@ -223,23 +226,23 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               <h3 className="font-bold text-sm mb-3">Cuenta de Cargo para el cobro de comisiones (Marcar con "X" la opción que desea seleccionar)</h3>
               
               <div className="space-y-2">
-                <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
-                  <span className="text-sm mr-3">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
-                  <span className="text-sm mr-3">Corriente S/</span>
-                  <span className="text-sm mr-3">Nro. de cuenta</span>
+                <div className="flex items-center space-x-2">
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center flex items-center justify-center">X</div>
+                  <span className="text-sm">Ahorro</span>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <span className="text-sm">Corriente S/</span>
+                  <span className="text-sm">Nro. de cuenta</span>
                   <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
                     {/* Campo para número de cuenta */}
                   </div>
                 </div>
                 
-                <div className="flex items-center">
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
-                  <span className="text-sm mr-3">Ahorro</span>
-                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
-                  <span className="text-sm mr-3">Corriente $</span>
-                  <span className="text-sm mr-3">Nro. de Cuenta</span>
+                <div className="flex items-center space-x-2">
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <span className="text-sm">Ahorro</span>
+                  <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                  <span className="text-sm">Corriente $</span>
+                  <span className="text-sm">Nro. de Cuenta</span>
                   <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
                     {/* Campo para número de cuenta */}
                   </div>
@@ -257,35 +260,35 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                 <table className="w-full border-collapse text-xs">
                   <thead>
                     <tr>
-                      <th className="border-2 border-gray-800 p-2 text-left"></th>
-                      <th className="border-2 border-gray-800 p-2 text-center" colSpan={2}>Control de Monto Máximo por Lote</th>
-                      <th className="border-2 border-gray-800 p-2 text-center" colSpan={2}>Control de Monto Máximo por Pago</th>
+                      <th className="border-2 border-gray-800 p-2 text-left bg-gray-100"></th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100" colSpan={2}>Control de Monto Máximo por Lote</th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100" colSpan={2}>Control de Monto Máximo por Pago</th>
                     </tr>
                     <tr>
-                      <th className="border-2 border-gray-800 p-2 text-left"></th>
-                      <th className="border-2 border-gray-800 p-2 text-center">S/</th>
-                      <th className="border-2 border-gray-800 p-2 text-center">$</th>
-                      <th className="border-2 border-gray-800 p-2 text-center">S/</th>
-                      <th className="border-2 border-gray-800 p-2 text-center">$</th>
+                      <th className="border-2 border-gray-800 p-2 text-left bg-gray-100"></th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">S/</th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">$</th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">S/</th>
+                      <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">$</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border-2 border-gray-800 p-2 font-medium">Remuneraciones</td>
+                      <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Remuneraciones</td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                     </tr>
                     <tr>
-                      <td className="border-2 border-gray-800 p-2 font-medium">Proveedores</td>
+                      <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Proveedores</td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                     </tr>
                     <tr>
-                      <td className="border-2 border-gray-800 p-2 font-medium">Pagos Varios</td>
+                      <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Pagos Varios</td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
                       <td className="border-2 border-gray-800 p-2 h-8"></td>
@@ -296,13 +299,13 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
               </div>
             </div>
 
-            {/* Información adicional */}
+            {/* Información adicional para Proveedores y Pagos Varios */}
             <div className="mb-6">
               <h3 className="font-bold text-sm mb-3">Completar solo en caso de elegir el servicio de Pago Proveedores y/o Pagos Varios</h3>
               
               <div className="space-y-4">
                 <div>
-                  <span className="text-sm mr-3">Número de días máximo para el cobro de cheques y ordenes de pagos ( )</span>
+                  <span className="text-sm">Número de días máximo para el cobro de cheques y ordenes de pagos ( )</span>
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center">
                       <span className="text-sm mr-3 w-20">Proveedores</span>
@@ -315,6 +318,98 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
                   </div>
                   <p className="text-xs mt-2">( ) Tiempo Máximo 120 días. Culminado el plazo los cheques y órdenes de pago se revocan y se devuelven los fondos a la cuenta de cargo de la operación. En caso no indicar días, se configurará con el tiempo máximo.</p>
                 </div>
+
+                {/* Opción de consolidar facturas */}
+                <div>
+                  <span className="text-sm font-medium">Opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque( )</span>
+                  <p className="text-xs mb-2">(Marcar con "X" la opción que desea seleccionar)</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm w-20">Proveedores</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <span className="text-sm">Sí</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <span className="text-sm">No</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm w-20">Pagos Varios</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <span className="text-sm">Sí</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="border-2 border-gray-800 w-6 h-6 text-center"></div>
+                        <span className="text-sm">No</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs mt-2">( ) En caso no marque una opción, se considera que no desea la opción de consolidar Facturas, Notas de Crédito, Notas de Débito en un solo abono o Cheque</p>
+                </div>
+
+                {/* Distribución de comisión */}
+                <div>
+                  <span className="text-sm font-medium">Distribución Comisión Cheque Gerencia (Ordenante/Pagador) ( )</span>
+                  
+                  <div className="mt-2">
+                    <table className="border-collapse text-xs max-w-sm">
+                      <thead>
+                        <tr>
+                          <th className="border-2 border-gray-800 p-2 text-left bg-gray-100"></th>
+                          <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">S/</th>
+                          <th className="border-2 border-gray-800 p-2 text-center bg-gray-100">$</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Empresa</td>
+                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                        </tr>
+                        <tr>
+                          <td className="border-2 border-gray-800 p-2 font-medium bg-gray-50">Proveedor</td>
+                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                          <td className="border-2 border-gray-800 p-2 text-center">% </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs mt-2">( ) Al no elegir distribución de comisión será asumida en su totalidad por el Cliente</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Información a completar por INTERBANK */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Información a completar por INTERBANK</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[120px]">Código único:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {/* Campo para código único */}
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[120px]">Tienda Receptora:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {/* Campo para tienda receptora */}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Información de la Empresa */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Información de la Empresa</h3>
+              <div className="border-2 border-gray-800 p-4 min-h-[80px] bg-gray-50">
+                {/* Campo para información adicional de la empresa */}
               </div>
             </div>
 
