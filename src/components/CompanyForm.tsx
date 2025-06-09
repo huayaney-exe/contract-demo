@@ -110,7 +110,28 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
         description: "Datos validados correctamente. Generando anexo...",
       });
       
-      const completeData = {
+      // Determine account type and currency based on selections
+      let accountType = "";
+      let currency = "";
+      let accountNumber = "";
+
+      if (accountData.ahorroSoles || accountData.corrienteSoles) {
+        currency = "soles";
+        accountType = accountData.ahorroSoles ? "ahorro" : "corriente";
+        accountNumber = accountData.accountNumberSoles;
+      } else if (accountData.ahorroUsd || accountData.corrienteUsd) {
+        currency = "dolares";
+        accountType = accountData.ahorroUsd ? "ahorro" : "corriente";
+        accountNumber = accountData.accountNumberUsd;
+      }
+
+      // Map service type
+      let serviceType = "";
+      if (serviceData.remuneraciones) serviceType += "remuneraciones ";
+      if (serviceData.proveedores) serviceType += "proveedores ";
+      if (serviceData.pagosVarios) serviceType += "pagosVarios ";
+
+      const completeData: CompanyData = {
         ...formData,
         contactName: contactData.contactName,
         contactPhone: contactData.contactPhone,
@@ -118,7 +139,43 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
         contactEmail2: contactData.email2,
         legalRepresentative: contactData.contactName,
         phone: contactData.contactPhone,
-        email: contactData.email1
+        email: contactData.email1,
+        
+        // Service fields
+        serviceType: serviceType.trim(),
+        isRemuneraciones: serviceData.remuneraciones,
+        isProveedores: serviceData.proveedores,
+        isPagosVarios: serviceData.pagosVarios,
+        isNuevo: serviceData.nuevo,
+        isModificacion: serviceData.modificacion,
+        
+        // Account fields
+        accountType,
+        currency,
+        accountNumber,
+        
+        // Optional controls - map from controlsData to the interface fields
+        maxAmountPerBatchSoles: controlsData.remuneracionesLoteSoles,
+        maxAmountPerBatchDollars: controlsData.remuneracionesLoteUsd,
+        maxAmountPerPaymentSoles: controlsData.remuneracionesPagoSoles,
+        maxAmountPerPaymentDollars: controlsData.remuneracionesPagoUsd,
+        
+        // Additional information
+        maxDaysProviders: additionalData.maxDaysProviders,
+        maxDaysPayments: additionalData.maxDaysVarios,
+        consolidateInvoicesProviders: additionalData.consolidateProveedoresSi ? "si" : (additionalData.consolidateProveedoresNo ? "no" : ""),
+        consolidateInvoicesPayments: additionalData.consolidateVariosSi ? "si" : (additionalData.consolidateVariosNo ? "no" : ""),
+        
+        // Commission distribution
+        commissionDistributionCompanySoles: additionalData.empresaSoles,
+        commissionDistributionCompanyDollars: additionalData.empresaUsd,
+        commissionDistributionProviderSoles: additionalData.proveedorSoles,
+        commissionDistributionProviderDollars: additionalData.proveedorUsd,
+        
+        // Bank information (empty for client form, will be filled by bank)
+        uniqueCode: "",
+        receivingStore: "",
+        companyInfo: ""
       };
       
       onSubmit(completeData);
