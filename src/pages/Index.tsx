@@ -19,6 +19,42 @@ export interface CompanyData {
   phone: string;
   email: string;
   businessActivity: string;
+  
+  // Service fields
+  serviceType?: string;
+  isRemuneraciones?: boolean;
+  isProveedores?: boolean;
+  isPagosVarios?: boolean;
+  isNuevo?: boolean;
+  isModificacion?: boolean;
+  
+  // Account fields
+  accountType?: string;
+  currency?: string;
+  accountNumber?: string;
+  
+  // Optional controls
+  maxAmountPerBatchSoles?: string;
+  maxAmountPerBatchDollars?: string;
+  maxAmountPerPaymentSoles?: string;
+  maxAmountPerPaymentDollars?: string;
+  
+  // Additional information
+  maxDaysProviders?: string;
+  maxDaysPayments?: string;
+  consolidateInvoicesProviders?: string;
+  consolidateInvoicesPayments?: string;
+  
+  // Commission distribution
+  commissionDistributionCompanySoles?: string;
+  commissionDistributionCompanyDollars?: string;
+  commissionDistributionProviderSoles?: string;
+  commissionDistributionProviderDollars?: string;
+  
+  // Bank information
+  uniqueCode?: string;
+  receivingStore?: string;
+  companyInfo?: string;
 }
 
 const Index = () => {
