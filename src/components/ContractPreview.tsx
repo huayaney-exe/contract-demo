@@ -1,9 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { CompanyData } from "@/pages/Index";
 import { toast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 
 interface ContractPreviewProps {
   companyData: CompanyData;
@@ -16,6 +17,179 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
     month: 'long',
     day: 'numeric'
   });
+
+  const handleDownloadPDF = () => {
+    toast({
+      title: "Generando PDF",
+      description: "El anexo se está generando en formato PDF...",
+    });
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPosition = margin;
+
+      // Helper function to add text with word wrapping
+      const addText = (text: string, x: number, y: number, maxWidth: number, fontSize = 10) => {
+        pdf.setFontSize(fontSize);
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        pdf.text(lines, x, y);
+        return y + (lines.length * fontSize * 0.4);
+      };
+
+      // Header
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ANEXO PAGOS MASIVOS', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(
+        'Si desea afiliarse a los servicios de Pago de Remuneraciones y CTS, Pago a Proveedores y/o Pagos Varios, por favor complete este anexo.',
+        margin,
+        yPosition,
+        pageWidth - 2 * margin
+      );
+      yPosition += 10;
+
+      // Company Information
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Información Básica:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`Razón Social: ${companyData.companyName}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`RUC: ${companyData.ruc}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Representante Legal: ${companyData.legalRepresentative}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`DNI: ${companyData.dni}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Dirección: ${companyData.address}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Distrito: ${companyData.district}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Provincia: ${companyData.province}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Departamento: ${companyData.department}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Teléfono: ${companyData.phone}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Email: ${companyData.email}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Actividad Comercial: ${companyData.businessActivity}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Contact Person
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Persona de Contacto:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`Nombre: ${companyData.legalRepresentative}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Teléfono: ${companyData.phone}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Correo: ${companyData.email}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Service Selection
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Servicio:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`[X] Remuneraciones/CTS - ${companyData.serviceType}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`[ ] Proveedores`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`[ ] Pagos Varios`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 5;
+      yPosition = addText(`[X] Nuevo`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`[ ] Modificación`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Account Information
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Cuenta de Cargo:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`Tipo de Cuenta: ${companyData.accountType}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Moneda: ${companyData.currency}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Número de Cuenta: ${companyData.accountNumber}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Optional Controls
+      if (yPosition > pageHeight - 50) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Controles Opcionales:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`Control de Monto Máximo por Lote (S/): ${companyData.maxAmountPerBatchSoles || 'Sin límites'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Control de Monto Máximo por Lote ($): ${companyData.maxAmountPerBatchDollars || 'Sin límites'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Control de Monto Máximo por Pago (S/): ${companyData.maxAmountPerPaymentSoles || 'Sin límites'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Control de Monto Máximo por Pago ($): ${companyData.maxAmountPerPaymentDollars || 'Sin límites'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Additional Information
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Información Adicional:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 5;
+
+      pdf.setFont('helvetica', 'normal');
+      yPosition = addText(`Días Máximos Proveedores: ${companyData.maxDaysProviders || 'No especificado'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Días Máximos Pagos Varios: ${companyData.maxDaysPayments || 'No especificado'}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Consolidar Facturas Proveedores: ${companyData.consolidateInvoicesProviders}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Consolidar Facturas Pagos Varios: ${companyData.consolidateInvoicesPayments}`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 10;
+
+      // Commission Distribution
+      yPosition = addText(`Distribución Comisión Empresa (S/): ${companyData.commissionDistributionCompanySoles || 'No especificado'}%`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Distribución Comisión Empresa ($): ${companyData.commissionDistributionCompanyDollars || 'No especificado'}%`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Distribución Comisión Proveedor (S/): ${companyData.commissionDistributionProviderSoles || 'No especificado'}%`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition = addText(`Distribución Comisión Proveedor ($): ${companyData.commissionDistributionProviderDollars || 'No especificado'}%`, margin, yPosition, pageWidth - 2 * margin);
+      yPosition += 15;
+
+      // Signatures
+      if (yPosition > pageHeight - 80) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      pdf.setFont('helvetica', 'bold');
+      yPosition = addText('Firmas:', margin, yPosition, pageWidth - 2 * margin, 12);
+      yPosition += 20;
+
+      // Signature lines
+      const signatureWidth = (pageWidth - 3 * margin) / 2;
+      pdf.line(margin, yPosition, margin + signatureWidth, yPosition);
+      pdf.line(pageWidth - margin - signatureWidth, yPosition, pageWidth - margin, yPosition);
+      
+      yPosition += 5;
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Firma Representante Legal', margin, yPosition);
+      pdf.text('Firma del Banco', pageWidth - margin - signatureWidth, yPosition);
+      
+      yPosition += 5;
+      pdf.text(`${companyData.legalRepresentative}`, margin, yPosition);
+
+      // Footer
+      yPosition = pageHeight - 20;
+      pdf.setFontSize(8);
+      pdf.text(`Documento generado el ${currentDate}`, pageWidth / 2, yPosition, { align: 'center' });
+
+      // Save the PDF
+      pdf.save(`Anexo_Pagos_Masivos_${companyData.companyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+
+      toast({
+        title: "PDF generado exitosamente",
+        description: "El anexo ha sido descargado en formato PDF.",
+      });
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      toast({
+        title: "Error al generar PDF",
+        description: "Hubo un problema al generar el archivo PDF. Por favor, intente nuevamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handlePrint = () => {
     toast({
@@ -112,9 +286,15 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al Formulario
         </Button>
-        <Button onClick={handlePrint} size="lg" className="bg-interbank-primary hover:bg-interbank-accent">
-          Imprimir Anexo
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={handleDownloadPDF} size="lg" className="bg-interbank-button-green hover:bg-interbank-accent">
+            <Download className="w-4 h-4 mr-2" />
+            Descargar PDF
+          </Button>
+          <Button onClick={handlePrint} size="lg" variant="outline" className="border-interbank-primary text-interbank-primary hover:bg-interbank-light">
+            Imprimir Anexo
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-lg">
