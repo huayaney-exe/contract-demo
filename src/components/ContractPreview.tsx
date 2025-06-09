@@ -20,24 +20,76 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
   const handlePrint = () => {
     toast({
       title: "Preparando impresión",
-      description: "El contrato se está preparando para imprimir...",
+      description: "El anexo se está preparando para imprimir...",
     });
     
-    // Crear una nueva ventana para imprimir solo el contrato
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Contrato - ${companyData.companyName}</title>
+            <title>Anexo Pagos Masivos - ${companyData.companyName}</title>
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .content { margin: 20px 0; }
-              .signature-section { margin-top: 60px; }
-              .signature-line { border-bottom: 1px solid #000; width: 300px; margin: 20px 0; }
-              @media print { body { margin: 20px; } }
+              body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.4; 
+                margin: 20px; 
+                font-size: 11px;
+              }
+              .header { text-align: center; margin-bottom: 20px; }
+              .field-row { display: flex; align-items: center; margin: 8px 0; }
+              .field-label { margin-right: 10px; font-weight: normal; }
+              .field-box { 
+                border: 2px solid #000; 
+                min-height: 20px; 
+                padding: 3px 5px; 
+                background: white;
+                flex-grow: 1;
+                max-width: 400px;
+              }
+              .field-box-small { 
+                border: 2px solid #000; 
+                min-height: 20px; 
+                padding: 3px 5px; 
+                background: white;
+                width: 150px;
+                margin-right: 20px;
+              }
+              .section-title { 
+                font-weight: bold; 
+                margin: 15px 0 10px 0; 
+                font-size: 12px;
+              }
+              .checkbox-section { margin: 10px 0; }
+              .checkbox { 
+                border: 2px solid #000; 
+                width: 15px; 
+                height: 15px; 
+                display: inline-block; 
+                margin-right: 5px; 
+                text-align: center;
+                vertical-align: middle;
+              }
+              .note { font-size: 9px; margin: 5px 0; }
+              .signature-section { 
+                margin-top: 40px; 
+                display: flex; 
+                justify-content: space-between; 
+              }
+              .signature-box { 
+                text-align: center; 
+                width: 45%; 
+              }
+              .signature-line { 
+                border-bottom: 2px solid #000; 
+                height: 40px; 
+                margin-bottom: 5px; 
+              }
+              @media print { 
+                body { margin: 15px; } 
+                .no-print { display: none; }
+              }
             </style>
           </head>
           <body>
@@ -52,159 +104,240 @@ const ContractPreview = ({ companyData, onBack }: ContractPreviewProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between no-print">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al Formulario
         </Button>
         <Button onClick={handlePrint} size="lg">
-          Imprimir Contrato
+          Imprimir Anexo
         </Button>
       </div>
 
       <Card className="shadow-lg">
         <CardHeader className="bg-primary text-primary-foreground">
-          <CardTitle className="text-2xl">Vista Previa del Contrato</CardTitle>
+          <CardTitle className="text-2xl">Vista Previa del Anexo</CardTitle>
         </CardHeader>
         <CardContent className="p-8">
-          <div id="contract-content" className="max-w-none prose prose-lg">
-            {/* Header del Contrato */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-4">CONTRATO DE PRESTACIÓN DE SERVICIOS</h1>
-              <p className="text-lg text-muted-foreground">
-                Contrato celebrado en Lima, Perú, el {currentDate}
+          <div id="contract-content" className="max-w-none text-sm">
+            {/* Header del Anexo */}
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-bold mb-2">ANEXO PAGOS MASIVOS</h1>
+              <p className="text-sm">
+                Si desea afiliarse a los servicios de Pago de Remuneraciones y CTS, Pago a Proveedores y/o Pagos Varios, por favor complete este anexo.
               </p>
             </div>
 
-            {/* Partes del Contrato */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">PARTES CONTRATANTES</h2>
-              
-              <div className="mb-6">
-                <p className="font-semibold">LA EMPRESA:</p>
-                <ul className="list-none space-y-1 ml-4">
-                  <li><strong>Razón Social:</strong> {companyData.companyName}</li>
-                  <li><strong>RUC:</strong> {companyData.ruc}</li>
-                  <li><strong>Representante Legal:</strong> {companyData.legalRepresentative}</li>
-                  <li><strong>DNI:</strong> {companyData.dni}</li>
-                  <li><strong>Dirección:</strong> {companyData.address}, {companyData.district}, {companyData.province}, {companyData.department}</li>
-                  <li><strong>Teléfono:</strong> {companyData.phone}</li>
-                  <li><strong>Email:</strong> {companyData.email}</li>
-                  <li><strong>Actividad Comercial:</strong> {companyData.businessActivity}</li>
-                </ul>
+            {/* Información básica */}
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center">
+                <span className="text-sm font-medium mr-3 min-w-[200px]">Razón Social / Nombre del Cliente:</span>
+                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1 max-w-[400px]">
+                  {companyData.companyName}
+                </div>
               </div>
-
-              <div className="mb-6">
-                <p className="font-semibold">EL CONTRATISTA:</p>
-                <ul className="list-none space-y-1 ml-4">
-                  <li><strong>Nombres y Apellidos:</strong> _________________________________</li>
-                  <li><strong>DNI:</strong> _________________________________</li>
-                  <li><strong>Dirección:</strong> _________________________________</li>
-                  <li><strong>Teléfono:</strong> _________________________________</li>
-                  <li><strong>Email:</strong> _________________________________</li>
-                </ul>
+              
+              <div className="flex items-center">
+                <span className="text-sm font-medium mr-3 min-w-[200px]">RUC / DNI:</span>
+                <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1 max-w-[400px]">
+                  {companyData.ruc}
+                </div>
               </div>
             </div>
 
-            {/* Cláusulas del Contrato */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">PRIMERA: OBJETO DEL CONTRATO</h3>
-                <p className="text-justify">
-                  Mediante el presente contrato, EL CONTRATISTA se compromete a prestar servicios profesionales 
-                  a LA EMPRESA en el área de _________________________, cumpliendo con los más altos estándares 
-                  de calidad y profesionalismo.
-                </p>
+            {/* Persona de Contacto */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Persona de Contacto (En caso se requieran coordinaciones por correcciones en el formato)</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[120px]">Nombre Contacto:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {companyData.legalRepresentative}
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[80px]">Teléfono:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {companyData.phone}
+                  </div>
+                </div>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">SEGUNDA: DURACIÓN</h3>
-                <p className="text-justify">
-                  El presente contrato tendrá una duración de _____________ meses, iniciando el día 
-                  _____________ y culminando el día _____________, pudiendo ser renovado de común acuerdo 
-                  entre las partes.
-                </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[80px]">Correo 1:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {companyData.email}
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-3 min-w-[80px]">Correo 2:</span>
+                  <div className="border-2 border-gray-800 p-2 min-h-[35px] bg-gray-50 flex-1">
+                    {/* Campo vacío para llenar */}
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">TERCERA: CONTRAPRESTACIÓN</h3>
-                <p className="text-justify">
-                  Como contraprestación por los servicios prestados, LA EMPRESA se obliga a pagar 
-                  a EL CONTRATISTA la suma de S/. _____________ (_______________ soles), que será 
-                  cancelada de forma _____________.
-                </p>
+            {/* Servicio */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Servicio (Marcar con "X" la opción que desea seleccionar)</h3>
+              
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
+                  <span className="text-sm">Remuneraciones/CTS</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm">Proveedores (1)</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm">Pagos Varios (2)</span>
+                </div>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">CUARTA: OBLIGACIONES DE LA EMPRESA</h3>
-                <p className="text-justify">
-                  LA EMPRESA se compromete a:
-                </p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Proporcionar la información necesaria para el desarrollo de los servicios.</li>
-                  <li>Efectuar los pagos en las fechas acordadas.</li>
-                  <li>Brindar las facilidades necesarias para el cumplimiento del objeto contractual.</li>
-                </ul>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
+                  <span className="text-sm">Nuevo</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm">Modificación ( ) Solo se completarán los campos a modificar</span>
+                </div>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">QUINTA: OBLIGACIONES DEL CONTRATISTA</h3>
-                <p className="text-justify">
-                  EL CONTRATISTA se compromete a:
-                </p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Prestar los servicios con la diligencia y profesionalismo requerido.</li>
-                  <li>Mantener la confidencialidad de la información proporcionada.</li>
-                  <li>Cumplir con los plazos establecidos para la entrega de los servicios.</li>
-                  <li>Informar oportunamente sobre el avance de los trabajos.</li>
-                </ul>
+              
+              <div className="text-xs space-y-1">
+                <p>(1) Incluye pagos a Persona Jurídica y Persona Natural con documento oficial de identidad, permite realizar pagos mediante abono en cuenta mismo banco, transferencias CCI/BCR y cheques de gerencia.</p>
+                <p>(2) Incluye Persona Natural con documento oficial de identidad, permite realizar pagos en efectivo (Orden de Pago), cheques de gerencia y abono en cuenta)</p>
               </div>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">SEXTA: CONFIDENCIALIDAD</h3>
-                <p className="text-justify">
-                  EL CONTRATISTA se obliga a mantener en estricta confidencialidad toda la información 
-                  que llegue a su conocimiento con motivo de la ejecución del presente contrato, 
-                  no pudiendo divulgarla a terceros sin autorización expresa y por escrito de LA EMPRESA.
-                </p>
+            {/* Cuenta de Cargo */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Cuenta de Cargo para el cobro de comisiones (Marcar con "X" la opción que desea seleccionar)</h3>
+              
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center">X</div>
+                  <span className="text-sm mr-3">Ahorro</span>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm mr-3">Corriente S/</span>
+                  <span className="text-sm mr-3">Nro. de cuenta</span>
+                  <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
+                    {/* Campo para número de cuenta */}
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm mr-3">Ahorro</span>
+                  <div className="border-2 border-gray-800 w-6 h-6 mr-2 text-center"></div>
+                  <span className="text-sm mr-3">Corriente $</span>
+                  <span className="text-sm mr-3">Nro. de Cuenta</span>
+                  <div className="border-2 border-gray-800 p-1 min-h-[25px] bg-gray-50 w-48">
+                    {/* Campo para número de cuenta */}
+                  </div>
+                </div>
               </div>
+              
+              <p className="text-xs mt-2">Nota: Esta es la cuenta principal de cargo de comisiones.</p>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">SÉPTIMA: RESOLUCIÓN DE CONTROVERSIAS</h3>
-                <p className="text-justify">
-                  Las controversias que pudieran surgir con motivo de la interpretación o ejecución 
-                  del presente contrato, serán resueltas mediante trato directo entre las partes. 
-                  De no ser posible, se someterán a arbitraje de derecho conforme a la legislación peruana.
-                </p>
+            {/* Controles Opcionales */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Controles Opcionales (Si no se requieren controles, colocar "Sin límites" o "SL", caso contrario se rechazará la solicitud)</h3>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-xs">
+                  <thead>
+                    <tr>
+                      <th className="border-2 border-gray-800 p-2 text-left"></th>
+                      <th className="border-2 border-gray-800 p-2 text-center" colspan="2">Control de Monto Máximo por Lote</th>
+                      <th className="border-2 border-gray-800 p-2 text-center" colspan="2">Control de Monto Máximo por Pago</th>
+                    </tr>
+                    <tr>
+                      <th className="border-2 border-gray-800 p-2 text-left"></th>
+                      <th className="border-2 border-gray-800 p-2 text-center">S/</th>
+                      <th className="border-2 border-gray-800 p-2 text-center">$</th>
+                      <th className="border-2 border-gray-800 p-2 text-center">S/</th>
+                      <th className="border-2 border-gray-800 p-2 text-center">$</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border-2 border-gray-800 p-2 font-medium">Remuneraciones</td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                    </tr>
+                    <tr>
+                      <td className="border-2 border-gray-800 p-2 font-medium">Proveedores</td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                    </tr>
+                    <tr>
+                      <td className="border-2 border-gray-800 p-2 font-medium">Pagos Varios</td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                      <td className="border-2 border-gray-800 p-2 h-8"></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">OCTAVA: LEY APLICABLE</h3>
-                <p className="text-justify">
-                  El presente contrato se rige por las leyes de la República del Perú.
-                </p>
+            {/* Información adicional */}
+            <div className="mb-6">
+              <h3 className="font-bold text-sm mb-3">Completar solo en caso de elegir el servicio de Pago Proveedores y/o Pagos Varios</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <span className="text-sm mr-3">Número de días máximo para el cobro de cheques y ordenes de pagos ( )</span>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center">
+                      <span className="text-sm mr-3 w-20">Proveedores</span>
+                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32"></div>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm mr-3 w-20">Pagos Varios</span>
+                      <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 w-32"></div>
+                    </div>
+                  </div>
+                  <p className="text-xs mt-2">( ) Tiempo Máximo 120 días. Culminado el plazo los cheques y órdenes de pago se revocan y se devuelven los fondos a la cuenta de cargo de la operación. En caso no indicar días, se configurará con el tiempo máximo.</p>
+                </div>
               </div>
             </div>
 
             {/* Firmas */}
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="text-center">
-                <div className="border-b border-gray-400 mb-2 h-16"></div>
-                <p className="font-semibold">{companyData.legalRepresentative}</p>
-                <p>Representante Legal</p>
-                <p>{companyData.companyName}</p>
-                <p>DNI: {companyData.dni}</p>
+                <div className="border-b-2 border-gray-800 mb-2 h-16"></div>
+                <p className="font-medium text-sm">Firma Representante Legal del Cliente</p>
+                <p className="text-sm">Nombres y Apellidos:</p>
+                <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 mt-1">
+                  {companyData.legalRepresentative}
+                </div>
               </div>
               
               <div className="text-center">
-                <div className="border-b border-gray-400 mb-2 h-16"></div>
-                <p className="font-semibold">EL CONTRATISTA</p>
-                <p>Nombres y Apellidos</p>
-                <p>DNI: _______________</p>
+                <div className="border-b-2 border-gray-800 mb-2 h-16"></div>
+                <p className="font-medium text-sm">Firma del banco</p>
+                <p className="text-sm">Tienda / Soporte Banca Comercial:</p>
+                <div className="border-2 border-gray-800 p-2 min-h-[25px] bg-gray-50 mt-1"></div>
               </div>
             </div>
 
-            <div className="mt-8 text-center text-sm text-muted-foreground">
+            <div className="mt-8 text-center text-xs text-muted-foreground">
               <p>Documento generado automáticamente el {currentDate}</p>
             </div>
           </div>

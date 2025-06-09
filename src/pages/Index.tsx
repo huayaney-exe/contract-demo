@@ -43,10 +43,10 @@ const Index = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-primary mb-4">
-              Generador de Contratos Empresariales
+              Anexo Pagos Masivos
             </h1>
             <p className="text-xl text-muted-foreground">
-              Complete sus datos empresariales y genere su contrato automáticamente
+              Complete la información para generar su anexo de servicios bancarios
             </p>
           </div>
 
@@ -59,7 +59,7 @@ const Index = () => {
                 }`}>
                   {currentStep === 'contract' ? <CheckCircle className="w-5 h-5" /> : '1'}
                 </div>
-                <span className="font-medium">Datos Empresariales</span>
+                <span className="font-medium">Información del Cliente</span>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -71,7 +71,7 @@ const Index = () => {
                 <span className={`font-medium ${
                   currentStep === 'contract' ? 'text-primary' : 'text-muted-foreground'
                 }`}>
-                  Vista Previa del Contrato
+                  Vista Previa del Anexo
                 </span>
               </div>
             </div>
