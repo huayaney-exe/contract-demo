@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle } from "lucide-react";
 import CompanyForm from "@/components/CompanyForm";
 import ContractPreview from "@/components/ContractPreview";
+import WizardContainer from "@/components/wizard/WizardContainer";
 
 export interface CompanyData {
   companyName: string;
@@ -76,8 +77,9 @@ export interface CompanyData {
 }
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'form' | 'contract'>('form');
+  const [currentStep, setCurrentStep] = useState<'wizard' | 'contract'>('wizard');
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
+  const [useNewWizard] = useState(true); // Toggle to use new wizard (set to true for Revolut-style UX)
 
   const handleFormSubmit = (data: CompanyData) => {
     setCompanyData(data);
@@ -85,10 +87,40 @@ const Index = () => {
   };
 
   const handleBackToForm = () => {
-    setCurrentStep('form');
+    setCurrentStep('wizard');
   };
 
-  const progress = currentStep === 'form' ? 50 : 100;
+  // New wizard flow - no progress indicator needed (handled by wizard)
+  if (useNewWizard && currentStep === 'wizard') {
+    return <WizardContainer onComplete={handleFormSubmit} />;
+  }
+
+  // Contract preview (same for both flows)
+  if (currentStep === 'contract' && companyData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-interbank-light to-white">
+        <div className="container-custom section">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="gradient-text mb-6 animate-slide-in">
+                Anexo Pagos Masivos
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto animate-slide-in">
+                Vista previa de tu anexo completado
+              </p>
+            </div>
+            <ContractPreview
+              companyData={companyData}
+              onBack={handleBackToForm}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to legacy form (kept for reference)
+  const progress = currentStep === 'wizard' ? 50 : 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-interbank-light to-white">
@@ -109,8 +141,8 @@ const Index = () => {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
-                  currentStep === 'form' 
-                    ? 'bg-interbank-primary text-white shadow-lg' 
+                  currentStep === 'wizard'
+                    ? 'bg-interbank-primary text-white shadow-lg'
                     : 'bg-interbank-button-green text-white shadow-lg'
                 }`}>
                   {currentStep === 'contract' ? <CheckCircle className="w-6 h-6" /> : '1'}
@@ -120,11 +152,11 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground">Complete los datos de su empresa</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
-                  currentStep === 'contract' 
-                    ? 'bg-interbank-primary text-white shadow-lg' 
+                  currentStep === 'contract'
+                    ? 'bg-interbank-primary text-white shadow-lg'
                     : 'bg-muted text-muted-foreground'
                 }`}>
                   2
@@ -142,18 +174,9 @@ const Index = () => {
             <Progress value={progress} className="w-full h-3 bg-interbank-light" />
           </Card>
 
-          {/* Content */}
+          {/* Content - Legacy Form */}
           <div className="animate-slide-in">
-            {currentStep === 'form' && (
-              <CompanyForm onSubmit={handleFormSubmit} />
-            )}
-
-            {currentStep === 'contract' && companyData && (
-              <ContractPreview 
-                companyData={companyData} 
-                onBack={handleBackToForm}
-              />
-            )}
+            <CompanyForm onSubmit={handleFormSubmit} />
           </div>
         </div>
       </div>
